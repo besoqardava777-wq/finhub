@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinHub.ge - კრიპტო და ვალუტის პორტალი</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white font-sans min-h-screen">
+
+    <nav class="border-b border-slate-800 p-4 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition">
+                FinHub.ge
+            </h1>
+            <div id="last-updated" class="text-xs text-slate-500 font-mono transition-colors duration-300">
+                მონაცემები ახლდება...
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        
+        <section class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-3 tracking-tight">ფინანსური ჰაბი</h2>
+            <p class="text-slate-400">აკონტროლე და დააკონვერტირე აქტივები ერთ სივრცეში</p>
+        </section>
+
+        <section id="converter-section" class="mb-12 scroll-mt-24">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-3xl border border-slate-700 shadow-2xl max-w-4xl mx-auto transition-all duration-300 ring-0 hover:ring-2 hover:ring-slate-700">
+                <div class="flex items-center gap-2 mb-6">
+                    <i class="fas fa-calculator text-blue-400 text-xl"></i>
+                    <h3 class="text-xl font-bold">სწრაფი კონვერტერი</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
+                    <div class="md:col-span-3">
+                        <div class="relative">
+                            <input type="number" id="convert-from-amount" value="100" 
+                                class="w-full bg-slate-700/50 border border-slate-600 rounded-2xl p-4 pl-12 focus:outline-none focus:border-blue-500 transition text-xl font-bold">
+                            <span id="from-symbol-icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₿</span>
+                            <select id="convert-from-select" onchange="updateConversion()"
+                                class="absolute right-2 top-2 bottom-2 bg-slate-800 border-none rounded-xl px-2 text-sm focus:ring-0 cursor-pointer font-bold">
+                                <option value="BTC" selected>BTC</option>
+                                <option value="GEL">GEL</option>
+                                <option value="USD">USD</option>
+                                <option value="ETH">ETH</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center md:col-span-1">
+                        <button onclick="swapCurrencies()" class="bg-blue-600/20 p-3 rounded-full text-blue-400 border border-blue-500/30 hover:bg-blue-600/40 hover:text-white transition cursor-pointer" title="ვალუტების გაცვლა">
+                            <i class="fas fa-exchange-alt md:rotate-0 rotate-90"></i>
+                        </button>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <div class="relative">
+                            <input type="text" id="convert-to-amount" readonly placeholder="შედეგი..."
+                                class="w-full bg-slate-700/30 border border-slate-600 rounded-2xl p-4 pl-12 text-xl font-bold text-emerald-400 focus:outline-none">
+                            <span id="to-symbol-icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                            <select id="convert-to-select" onchange="updateConversion()"
+                                class="absolute right-2 top-2 bottom-2 bg-slate-800 border-none rounded-xl px-2 text-sm focus:ring-0 cursor-pointer font-bold">
+                                <option value="USD" selected>USD</option>
+                                <option value="GEL">GEL</option>
+                                <option value="BTC">BTC</option>
+                                <option value="ETH">ETH</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            
+            <div class="flex space-x-2 bg-slate-800 p-1 rounded-xl border border-slate-700 w-full md:w-auto overflow-x-auto">
+                <button onclick="switchTab('crypto')" id="cryptoTab" class="px-6 py-2 rounded-lg bg-blue-600 text-white font-bold transition-all shadow-lg shadow-blue-900/20 whitespace-nowrap">კრიპტო</button>
+                <button onclick="switchTab('fiat')" id="fiatTab" class="px-6 py-2 rounded-lg text-slate-400 hover:text-white transition-all whitespace-nowrap">ვალუტა (GEL)</button>
+            </div>
+            
+            <div class="relative w-full md:w-64 flex-shrink-0">
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="ძებნა (მაგ: BTC)..." 
+                    class="w-full bg-slate-800/80 border border-slate-700 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-blue-500 text-white placeholder-slate-500 transition shadow-inner">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+            </div>
+
+            <button onclick="refreshData()" class="w-full md:w-auto text-sm text-slate-400 hover:text-blue-400 flex justify-center items-center gap-2 bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 transition flex-shrink-0">
+                <i class="fas fa-sync-alt" id="refresh-icon"></i> <span class="md:hidden lg:inline">განახლება</span>
+            </button>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-3xl overflow-hidden shadow-2xl border border-slate-700 relative backdrop-blur-sm">
+            <div id="loading-overlay" class="absolute inset-0 bg-slate-900/60 flex items-center justify-center z-10 hidden">
+                <div class="loader w-10 h-10 border-4 border-slate-700 rounded-full"></div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-700/20 text-slate-500 text-xs uppercase tracking-widest">
+                            <th class="p-5 font-semibold">აქტივი</th>
+                            <th class="p-5 font-semibold text-right">ფასი</th>
+                            <th class="p-5 font-semibold text-right">24სთ ცვლილება</th>
+                            <th class="p-5 font-semibold text-right hidden md:table-cell">საბაზრო კაპ.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table" class="divide-y divide-slate-700/30">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container mx-auto px-4 py-12 text-center text-slate-600 text-xs">
+        &copy; 2026 FinHub.ge | მონაცემები მოწოდებულია CoinGecko & ExchangeRate-API-ს მიერ
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
