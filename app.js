@@ -7,9 +7,12 @@ let lastCryptoFetch = 0;
 let lastFiatFetch = 0;
 const CACHE_TIME = 30000; 
 
+// ფავორიტების შენახვა LocalStorage-ში
+let favorites = JSON.parse(localStorage.getItem('finhub_favorites')) || [];
+
 const formatNum = (num, digits = 2) => new Intl.NumberFormat('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(num);
 
-// Theme ლოგიკა (ღამის/დღის რეჟიმი)
+// Theme ლოგიკა
 function initTheme() {
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
@@ -34,6 +37,7 @@ function toggleTheme() {
     }
 }
 
+// მონაცემების წამოღება (ახლა უკვე sparkline=true პარამეტრით გრაფიკებისთვის)
 async function fetchCryptoData(force = false) {
     const now = Date.now();
     if (!force && now - lastCryptoFetch < CACHE_TIME && cachedCrypto.length > 0) {
@@ -43,7 +47,8 @@ async function fetchCryptoData(force = false) {
 
     try {
         showLoader(true);
-        const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false&price_change_percentage=24h');
+        // sparkline=true დამატებულია ლინკში!
+        const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=true&price_change_percentage=24h');
         if (!response.ok) throw new Error(`API Error: ${response.status}`);
         
         const data = await response.json();
@@ -59,10 +64,6 @@ async function fetchCryptoData(force = false) {
         console.error("კრიპტო ერორი:", e); 
         if (cachedCrypto.length > 0 && currentTab === 'crypto') {
             renderCrypto(cachedCrypto);
-            const timeInfo = document.getElementById('last-updated');
-            timeInfo.innerText = "განახლება შეფერხდა (API Limit).";
-            timeInfo.classList.add('text-rose-500');
-            setTimeout(() => timeInfo.classList.remove('text-rose-500'), 5000);
         }
     } finally { 
         showLoader(false); 
@@ -100,10 +101,52 @@ async function fetchFiatData(force = false) {
         updateConversion(); 
     } catch (e) { 
         console.error("ვალუტის ერორი:", e); 
-        if (cachedFiat.length > 0 && currentTab === 'fiat') renderFiat(cachedFiat);
     } finally { 
         showLoader(false); 
     }
+}
+
+// ფავორიტების ლოგიკა
+function toggleFavorite(symbol, event) {
+    event.stopPropagation(); // ხელს უშლის სტრიქონზე დაჭერისას კონვერტერის ჩართვას
+    
+    if (favorites.includes(symbol)) {
+        favorites = favorites.filter(fav => fav !== symbol); // წაშლა
+    } else {
+        favorites.push(symbol); // დამატება
+    }
+    
+    localStorage.setItem('finhub_favorites', JSON.stringify(favorites));
+    
+    // ხელახლა ვხატავთ ცხრილს, რომ ფავორიტები ზემოთ ავიდეს
+    if(currentTab === 'crypto') renderCrypto(cachedCrypto);
+}
+
+// გრაფიკის დახატვის ფუნქცია (SVG გენერატორი)
+function generateSparkline(sparklineData, isUp) {
+    if (!sparklineData || !sparklineData.price || sparklineData.price.length === 0) return '';
+    const prices = sparklineData.price;
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const range = max - min;
+    
+    const width = 100;
+    const height = 30;
+    
+    // ვქმნით X და Y კოორდინატებს ფასების მიხედვით
+    const points = prices.map((price, index) => {
+        const x = (index / (prices.length - 1)) * width;
+        const y = height - ((price - min) / range) * height;
+        return `${x},${y}`;
+    }).join(' ');
+
+    const color = isUp ? '#10b981' : '#e11d48'; // მწვანე ან წითელი ფერი
+    
+    return `
+    <svg viewBox="0 -5 ${width} ${height + 10}" class="w-24 h-10 mx-auto" preserveAspectRatio="none">
+        <polyline fill="none" stroke="${color}" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+    `;
 }
 
 function updateConversion() {
@@ -131,18 +174,14 @@ function updateConversion() {
     resultField.value = finalResult.toFixed(digits);
 }
 
-function isCrypto(symbol) {
-    return !['USD', 'GEL', 'EUR', 'GBP'].includes(symbol);
-}
+function isCrypto(symbol) { return !['USD', 'GEL', 'EUR', 'GBP'].includes(symbol); }
 
 function swapCurrencies() {
     const fromSelect = document.getElementById('convert-from-select');
     const toSelect = document.getElementById('convert-to-select');
-    
     const tempValue = fromSelect.value;
     fromSelect.value = toSelect.value;
     toSelect.value = tempValue;
-    
     updateConversion(); 
 }
 
@@ -177,9 +216,7 @@ function selectForConversion(symbol) {
 function updateSymbols() {
     const fromCurrency = document.getElementById('convert-from-select').value;
     const toCurrency = document.getElementById('convert-to-select').value;
-    
     const icons = { 'GEL': '₾', 'USD': '$', 'BTC': '₿', 'ETH': 'Ξ', 'EUR': '€', 'GBP': '£' };
-    
     document.getElementById('from-symbol-icon').innerText = icons[fromCurrency] || fromCurrency.substring(0,1);
     document.getElementById('to-symbol-icon').innerText = icons[toCurrency] || toCurrency.substring(0,1);
 }
@@ -192,10 +229,26 @@ function renderCrypto(data) {
     const tableBody = document.getElementById('data-table');
     tableBody.innerHTML = '';
     
-    data.forEach(coin => {
+    // ვალაგებთ მონაცემებს: ჯერ ფავორიტები გამოჩნდეს, მერე დანარჩენი
+    const sortedData = [...data].sort((a, b) => {
+        const aFav = favorites.includes(a.symbol.toUpperCase());
+        const bFav = favorites.includes(b.symbol.toUpperCase());
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+        return 0; 
+    });
+    
+    sortedData.forEach(coin => {
         const isUp = coin.price_change_percentage_24h >= 0;
+        const symbol = coin.symbol.toUpperCase();
+        const isFav = favorites.includes(symbol);
+        const sparklineSvg = generateSparkline(coin.sparkline_in_7d, isUp);
+
         tableBody.innerHTML += `
-            <tr onclick="selectForConversion('${coin.symbol.toUpperCase()}')" class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40 transition group border-b border-slate-200 dark:border-slate-700/30">
+            <tr onclick="selectForConversion('${symbol}')" class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition group border-b border-slate-200 dark:border-slate-700/30">
+                <td class="p-5 text-center">
+                    <i onclick="toggleFavorite('${symbol}', event)" class="${isFav ? 'fas text-yellow-400' : 'far text-slate-300 dark:text-slate-600 hover:text-yellow-400'} fa-star text-lg transition z-10 relative" title="ფავორიტებში დამატება"></i>
+                </td>
                 <td class="p-5 flex items-center space-x-4">
                     <img src="${coin.image}" class="w-7 h-7 rounded-full" alt="${coin.name}">
                     <div>
@@ -207,7 +260,10 @@ function renderCrypto(data) {
                 <td class="p-5 text-right text-sm font-semibold ${isUp ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">
                     ${isUp ? '▲' : '▼'} ${Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
                 </td>
-                <td class="p-5 text-right text-slate-500 text-xs hidden md:table-cell">$${formatNum(coin.market_cap / 1000000000)}B</td>
+                <td class="p-5 text-center hidden md:table-cell align-middle">
+                    ${sparklineSvg}
+                </td>
+                <td class="p-5 text-right text-slate-500 text-xs hidden lg:table-cell">$${formatNum(coin.market_cap / 1000000000)}B</td>
             </tr>`;
     });
     filterTable();
@@ -219,7 +275,8 @@ function renderFiat(ratesData) {
 
     ratesData.forEach(item => {
         tableBody.innerHTML += `
-            <tr onclick="selectForConversion('${item.symbol}')" class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40 transition border-b border-slate-200 dark:border-slate-700/30 group">
+            <tr onclick="selectForConversion('${item.symbol}')" class="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition border-b border-slate-200 dark:border-slate-700/30 group">
+                <td class="p-5 text-center text-slate-300 dark:text-slate-600">-</td>
                 <td class="p-5 flex items-center space-x-4">
                     <div class="w-7 h-7 bg-blue-100 dark:bg-blue-600/20 rounded-full flex items-center justify-center text-[10px] text-blue-600 dark:text-blue-400 font-bold group-hover:bg-blue-600 group-hover:text-white transition">${item.symbol[0]}</div>
                     <div>
@@ -229,7 +286,8 @@ function renderFiat(ratesData) {
                 </td>
                 <td class="p-5 text-right font-mono text-sm font-bold text-emerald-700 dark:text-emerald-100">${formatNum(item.price, 4)} ₾</td>
                 <td class="p-5 text-right text-sm text-slate-500">--</td>
-                <td class="p-5 text-right text-slate-500 text-xs hidden md:table-cell">საერთაშორისო ბაზარი</td>
+                <td class="p-5 text-center hidden md:table-cell text-slate-500 text-xs">--</td>
+                <td class="p-5 text-right text-slate-500 text-xs hidden lg:table-cell">საერთაშორისო ბაზარი</td>
             </tr>`;
     });
     filterTable();
@@ -241,7 +299,8 @@ function filterTable() {
     const rows = tableBody.getElementsByTagName("tr");
 
     for (let i = 0; i < rows.length; i++) {
-        const nameColumn = rows[i].getElementsByTagName("td")[0];
+        // ვეძებთ მეორე სვეტში (სადაც სახელია)
+        const nameColumn = rows[i].getElementsByTagName("td")[1];
         if (nameColumn) {
             const textValue = nameColumn.textContent || nameColumn.innerText;
             rows[i].style.display = textValue.toLowerCase().indexOf(input) > -1 ? "" : "none";
@@ -253,7 +312,6 @@ function switchTab(type) {
     currentTab = type;
     document.getElementById('searchInput').value = '';
     
-    // ტაბების სტილის შეცვლა
     const activeClass = "px-6 py-2 rounded-lg bg-blue-600 text-white font-bold transition-all shadow-lg whitespace-nowrap";
     const inactiveClass = "px-6 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white transition-all whitespace-nowrap";
     
@@ -267,7 +325,6 @@ function switchTab(type) {
         if(cachedFiat.length > 0) renderFiat(cachedFiat);
         fetchFiatData(); 
     }
-    // ამოღებულია კალკულატორის ავტომატური შეცვლის ლოგიკა!
 }
 
 function showLoader(show) {
