@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <meta name="google-site-verification" content="Idws_ky_A2EttQ1j8H6vcuPM-InZqRztKQIRYFgeo24" />
+    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
 
     <title>FinHub.ge - კრიპტო და ვალუტის პორტალი</title>
@@ -47,7 +48,7 @@
         </section>
 
         <div class="max-w-4xl mx-auto mb-10 hidden sm:block">
-            <div class="ad-placeholder w-full h-24 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center text-slate-400 transition-all">
+            <div class="ad-placeholder w-full h-24 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center text-slate-400">
                 <span class="text-xs uppercase tracking-widest font-bold mb-1">რეკლამა</span>
                 <p class="text-[10px]">Google AdSense Space</p>
             </div>
@@ -57,15 +58,15 @@
             <div class="bg-gradient-to-br from-white to-slate-100 dark:from-slate-800 dark:to-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl max-w-4xl mx-auto transition-all duration-300">
                 <div class="flex items-center gap-2 mb-6">
                     <i class="fas fa-calculator text-blue-600 dark:text-blue-400 text-xl"></i>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">სწრაფი კონვერტერი</h3>
+                    <h3 class="text-xl font-bold">სწრაფი კონვერტერი</h3>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
                     <div class="md:col-span-3">
                         <div class="relative">
-                            <input type="number" id="convert-from-amount" value="100" class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-2xl p-4 pl-12 focus:outline-none focus:border-blue-500 transition text-xl font-bold text-slate-900 dark:text-white">
+                            <input type="number" id="convert-from-amount" value="100" class="w-full bg-slate-100 dark:bg-slate-700/50 border border-slate-300 dark:border-slate-600 rounded-2xl p-4 pl-12 focus:outline-none focus:border-blue-500 transition text-xl font-bold">
                             <span id="from-symbol-icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">$</span>
-                            <select id="convert-from-select" onchange="updateConversion()" class="absolute right-2 top-2 bottom-2 bg-slate-200 dark:bg-slate-800 border-none rounded-xl px-2 text-sm focus:ring-0 cursor-pointer font-bold text-slate-900 dark:text-white">
+                            <select id="convert-from-select" onchange="updateConversion()" class="absolute right-2 top-2 bottom-2 bg-slate-200 dark:bg-slate-800 border-none rounded-xl px-2 text-sm cursor-pointer font-bold">
                                 <option value="USD" selected>USD</option>
                                 <option value="GEL">GEL</option>
                                 <option value="BTC">BTC</option>
@@ -82,9 +83,9 @@
 
                     <div class="md:col-span-3">
                         <div class="relative">
-                            <input type="text" id="convert-to-amount" readonly class="w-full bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-2xl p-4 pl-12 text-xl font-bold text-emerald-600 dark:text-emerald-400 focus:outline-none">
+                            <input type="text" id="convert-to-amount" readonly class="w-full bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-2xl p-4 pl-12 text-xl font-bold text-emerald-600 dark:text-emerald-400">
                             <span id="to-symbol-icon" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">₾</span>
-                            <select id="convert-to-select" onchange="updateConversion()" class="absolute right-2 top-2 bottom-2 bg-slate-200 dark:bg-slate-800 border-none rounded-xl px-2 text-sm focus:ring-0 cursor-pointer font-bold text-slate-900 dark:text-white">
+                            <select id="convert-to-select" onchange="updateConversion()" class="absolute right-2 top-2 bottom-2 bg-slate-200 dark:bg-slate-800 border-none rounded-xl px-2 text-sm cursor-pointer font-bold">
                                 <option value="GEL" selected>GEL</option>
                                 <option value="USD">USD</option>
                                 <option value="BTC">BTC</option>
@@ -108,7 +109,7 @@
             </div>
 
             <button onclick="refreshData()" class="w-full md:w-auto text-sm text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 transition">
-                <i class="fas fa-sync-alt" id="refresh-icon"></i> <span class="md:hidden lg:inline">განახლება</span>
+                <i class="fas fa-sync-alt" id="refresh-icon"></i> განახლება
             </button>
         </div>
 
@@ -132,6 +133,28 @@
                 </table>
             </div>
         </div>
+
+        <section class="max-w-4xl mx-auto mt-16 mb-12 px-4">
+            <h3 class="text-2xl font-bold mb-8 text-center text-slate-900 dark:text-white">ხშირად დასმული კითხვები</h3>
+            <div class="grid gap-6 md:grid-cols-2">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                    <h4 class="font-bold text-blue-600 dark:text-blue-400 mb-2">რა არის კრიპტოვალუტა?</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">ეს არის ციფრული ვალუტა, რომელიც დაფუძნებულია ბლოკჩეინ ტექნოლოგიაზე. ის არ ექვემდებარება ცენტრალურ ბანკებს და მუშაობს დეცენტრალიზებულად.</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                    <h4 class="font-bold text-blue-600 dark:text-blue-400 mb-2">საიდან მოდის კურსები?</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">მონაცემები რეალურ დროში მოწოდებულია CoinGecko-ს და საერთაშორისო სავალუტო ბაზრების (ExchangeRate API) მიერ.</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                    <h4 class="font-bold text-blue-600 dark:text-blue-400 mb-2">როგორ მუშაობს კონვერტერი?</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">ჩვენი ალგორითმი იყენებს უახლეს საბაზრო ფასებს და ახდენს მათემატიკურ გადაანგარიშებას სხვადასხვა ვალუტებს შორის მაქსიმალური სიზუსტით.</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                    <h4 class="font-bold text-blue-600 dark:text-blue-400 mb-2">რატომ იცვლება ფასი ხშირად?</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">ფინანსური ბაზარი, განსაკუთრებით კრიპტო, ძალიან ვოლატილურია. ფასები იცვლება მიწოდება-მოთხოვნის შესაბამისად ყოველ წამს.</p>
+                </div>
+            </div>
+        </section>
 
         <div class="max-w-4xl mx-auto mb-10 text-center">
             <div class="ad-placeholder w-full h-20 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center text-slate-400 transition-all">
