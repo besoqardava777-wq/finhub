@@ -134,17 +134,24 @@
                     </div>
 
                     <div class="md:col-span-3">
-                        <div class="relative bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-emerald-500 transition">
-                            <div class="flex justify-between items-center px-3 pt-1 pb-1"><span class="text-xs font-bold text-slate-400" data-i18n="you_get">You Get</span></div>
-                            <div class="flex items-center">
-                                <span id="to-symbol-icon" class="text-emerald-500 font-bold text-xl pl-4">₾</span>
-                                <input type="text" id="convert-to-amount" readonly class="w-full bg-transparent border-none p-3 text-2xl font-black text-emerald-600 dark:text-emerald-400 focus:outline-none placeholder-slate-300">
-                                <select id="convert-to-select" onchange="updateConversion()" class="bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 px-3 text-sm font-bold outline-none cursor-pointer mr-2">
-                                    <option value="GEL" selected>GEL</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="BTC">BTC</option><option value="ETH">ETH</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+    <div class="relative bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-emerald-500 transition">
+        <div class="flex justify-between items-center px-3 pt-1 pb-1"><span class="text-xs font-bold text-slate-400" data-i18n="you_get">You Get</span></div>
+        <div class="flex items-center">
+            <span id="to-symbol-icon" class="text-emerald-500 font-bold text-xl pl-4">₿</span>
+            
+            <input type="text" id="convert-to-amount" readonly class="w-full bg-transparent border-none p-3 text-2xl font-black text-emerald-600 dark:text-emerald-400 focus:outline-none placeholder-slate-300">
+            
+            <select id="convert-to-select" onchange="updateConversion()" class="bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 px-3 text-sm font-bold outline-none cursor-pointer mr-2">
+                <option value="GEL">GEL</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="BTC" selected>BTC</option>
+                <option value="ETH">ETH</option>
+            </select>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
         </section>
