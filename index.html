@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f172a">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+    
     <title>NovaFi - Crypto & Fiat Portal</title>
     
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7242953104648884" crossorigin="anonymous"></script>
@@ -37,7 +38,7 @@
                 <div id="last-updated" class="text-xs text-slate-500 font-mono hidden sm:block">Loading...</div>
                 
                 <select id="language-selector" onchange="changeLanguage(this.value)" class="glass-panel border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-1.5 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm appearance-none cursor-pointer hidden sm:block">
-                    <option value="en">🇬🇧 EN</option>
+                    <option value="en" selected>🇬🇧 EN</option>
                     <option value="ka">🇬🇪 KA</option>
                     <option value="ru">🇷🇺 RU</option>
                     <option value="fr">🇫🇷 FR</option>
@@ -123,7 +124,12 @@
                                 <span id="from-symbol-icon" class="text-slate-400 font-bold text-xl pl-4">$</span>
                                 <input type="number" id="convert-from-amount" value="1000" class="w-full bg-transparent border-none p-3 text-2xl font-black focus:outline-none text-slate-800 dark:text-white">
                                 <select id="convert-from-select" onchange="updateConversion()" class="bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 px-3 text-sm font-bold outline-none cursor-pointer mr-2">
-                                    <option value="USD" selected>USD</option><option value="GEL">GEL</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="BTC">BTC</option><option value="ETH">ETH</option>
+                                    <option value="USD" selected>USD</option>
+                                    <option value="GEL">GEL</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="GBP">GBP</option>
+                                    <option value="BTC">BTC</option>
+                                    <option value="ETH">ETH</option>
                                 </select>
                             </div>
                         </div>
@@ -140,9 +146,7 @@
                             <div class="flex justify-between items-center px-3 pt-1 pb-1"><span class="text-xs font-bold text-slate-400" data-i18n="you_get">You Get</span></div>
                             <div class="flex items-center">
                                 <span id="to-symbol-icon" class="text-emerald-500 font-bold text-xl pl-4">₿</span>
-                                
                                 <input type="text" id="convert-to-amount" readonly class="w-full bg-transparent border-none p-3 text-2xl font-black text-emerald-600 dark:text-emerald-400 focus:outline-none placeholder-slate-300">
-                                
                                 <select id="convert-to-select" onchange="updateConversion()" class="bg-slate-100 dark:bg-slate-800 border-none rounded-xl py-2 px-3 text-sm font-bold outline-none cursor-pointer mr-2">
                                     <option value="GEL">GEL</option>
                                     <option value="USD">USD</option>
@@ -195,13 +199,6 @@
                 </table>
             </div>
         </div>
-
-        <div class="mb-10 hidden sm:block">
-            <div class="ad-placeholder w-full h-20 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center text-slate-400">
-                <span class="text-[10px] uppercase tracking-widest font-bold">Sponsored Content Space</span>
-            </div>
-        </div>
-
     </main>
 
     <footer class="glass-panel border-t border-white/20 dark:border-slate-800/50 pt-12 pb-8 mt-auto">
@@ -218,6 +215,7 @@
                     <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-2">
                         <li><a href="#converter-section" class="hover:text-blue-500 transition">Converter</a></li>
                         <li><a href="#news-section" class="hover:text-blue-500 transition">News</a></li>
+                        <li><a href="privacy.html" class="hover:text-blue-500 transition font-bold">Privacy Policy</a></li>
                         <li><a href="https://www.coingecko.com" target="_blank" class="hover:text-blue-500 transition">CoinGecko API</a></li>
                     </ul>
                 </div>
