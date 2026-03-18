@@ -12,7 +12,7 @@ const translations = {
         total_balance: "საერთო ბალანსი", add_asset_btn: "აქტივის დამატება", empty_portfolio: "პორტფელი ცარიელია. დაამატეთ აქტივები.",
         top_gainer: "დღის ლიდერი", top_loser: "დღის წამგებიანი", latest_news: "ფინანსური სიახლეები",
         converter_title: "გლობალური კონვერტერი", you_pay: "იხდით", you_get: "იღებთ",
-        tab_crypto: "კრიპტო", tab_fiat: "ვალუტა (GEL)", search_placeholder: "მოძებნე აქტივი...",
+        tab_crypto: "კრიპტო", tab_fiat: "ვალუტა", search_placeholder: "მოძებნე აქტივი...",
         col_asset: "აქტივი", col_price: "ფასი", col_24h: "24სთ %", col_trend: "ტრენდი (7დ)", col_cap: "კაპიტალიზაცია",
         footer_about: "თქვენი ფინანსური მეგზური კრიპტო და ვალუტის ბაზრებზე. სწრაფი, ზუსტი და სანდო მონაცემები რეალურ დროში.",
         footer_links: "რესურსები", footer_contact: "კონტაქტი", api_error: "მონაცემების ჩატვირთვა ვერ მოხერხდა. სცადეთ მოგვიანებით."
@@ -151,13 +151,14 @@ async function fetchFiatData(force = false) {
             { name: 'Australian Dollar', symbol: 'AUD' },
             { name: 'Canadian Dollar', symbol: 'CAD' },
             { name: 'Turkish Lira', symbol: 'TRY' },
-            { name: 'UAE Dirham', symbol: 'AED' }
+            { name: 'UAE Dirham', symbol: 'AED' },
+            { name: 'Georgian Lari', symbol: 'GEL' }
         ];
 
         cachedFiat = fiatList.map(f => {
             if(data.rates[f.symbol]) {
                 rates[f.symbol] = 1 / data.rates[f.symbol];
-                return { name: f.name, symbol: f.symbol, price: data.rates.GEL / data.rates[f.symbol] };
+                return { name: f.name, symbol: f.symbol }; // ახლა ფასს დინამიურად ვითვლით
             }
         }).filter(Boolean);
 
@@ -278,9 +279,15 @@ function updateConversion() {
     const fromCur = document.getElementById('convert-from-select').value;
     const toCur = document.getElementById('convert-to-select').value;
     const resultField = document.getElementById('convert-to-amount');
+    
     updateSymbols();
+    
     if (isNaN(fromAmt) || !rates[fromCur] || !rates[toCur]) { resultField.value = ''; return; }
     resultField.value = ((fromAmt * rates[fromCur]) / rates[toCur]).toFixed(isCrypto(toCur) ? 6 : 2);
+
+    // ვაახლებთ ცხრილებს დინამიურად, არჩეული ვალუტის მიხედვით
+    if (currentTab === 'crypto' && cachedCrypto.length > 0) renderCrypto(cachedCrypto);
+    if (currentTab === 'fiat' && cachedFiat.length > 0) renderFiat(cachedFiat);
 }
 
 function isCrypto(symbol) { return !['USD', 'GEL', 'EUR', 'GBP', 'CHF', 'JPY', 'AUD', 'CAD', 'TRY', 'AED'].includes(symbol); }
@@ -317,36 +324,58 @@ function updateSymbols() {
 
 document.getElementById('convert-from-amount').addEventListener('input', updateConversion);
 
+// აქტიური "You Pay" ვალუტის ლოგიკა ცხრილებისთვის
+function getBaseCurrencyInfo() {
+    const baseCur = document.getElementById('convert-from-select').value;
+    const baseRate = rates[baseCur] || 1;
+    const icons = { 'GEL': '₾', 'USD': '$', 'BTC': '₿', 'ETH': 'Ξ', 'EUR': '€', 'GBP': '£', 'JPY': '¥', 'TRY': '₺', 'AED': 'د.إ' };
+    const baseIcon = icons[baseCur] || baseCur;
+    return { baseCur, baseRate, baseIcon };
+}
+
 function renderCrypto(data) {
     const tbody = document.getElementById('data-table'); tbody.innerHTML = '';
     const sorted = [...data].sort((a, b) => (favorites.includes(b.symbol.toUpperCase()) ? 1 : 0) - (favorites.includes(a.symbol.toUpperCase()) ? 1 : 0));
     
+    const { baseCur, baseRate, baseIcon } = getBaseCurrencyInfo();
+
     sorted.forEach(c => {
         const isUp = c.price_change_percentage_24h >= 0, sym = c.symbol.toUpperCase(), isFav = favorites.includes(sym);
+        const priceInBase = c.current_price / baseRate;
+        const capInBase = c.market_cap / baseRate;
+        
         tbody.innerHTML += `
             <tr onclick="selectForConversion('${sym}')" class="hover:bg-slate-200/50 dark:hover:bg-slate-700/40 transition group border-b border-slate-200 dark:border-slate-800">
                 <td class="p-4 text-center"><i onclick="toggleFavorite('${sym}', event)" class="${isFav ? 'fas text-yellow-400' : 'far text-slate-300 dark:text-slate-600 hover:text-yellow-400'} fa-star text-lg transition z-10 relative"></i></td>
                 <td class="p-4 flex items-center space-x-4"><img src="${c.image}" class="w-8 h-8 rounded-full shadow-sm" alt="icon">
                     <div><span class="block font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">${c.name}</span><span class="text-[10px] text-slate-500 uppercase">${sym}</span></div>
                 </td>
-                <td class="p-4 text-right font-mono text-sm font-bold text-blue-700 dark:text-blue-200">$${formatNum(c.current_price, 2)}</td>
+                <td class="p-4 text-right font-mono text-sm font-bold text-blue-700 dark:text-blue-200">${baseIcon} ${formatNum(priceInBase, isCrypto(baseCur) ? 6 : 2)}</td>
                 <td class="p-4 text-right"><span class="px-2 py-1.5 rounded-lg text-xs font-bold ${isUp ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'}">${isUp ? '▲' : '▼'} ${Math.abs(c.price_change_percentage_24h).toFixed(2)}%</span></td>
                 <td class="p-4 text-center hidden md:table-cell align-middle">${generateSparkline(c.sparkline_in_7d, isUp)}</td>
-                <td class="p-4 text-right text-slate-500 text-xs hidden lg:table-cell font-mono">$${formatNum(c.market_cap / 1e9)}B</td>
+                <td class="p-4 text-right text-slate-500 text-xs hidden lg:table-cell font-mono">${baseIcon} ${formatNum(capInBase / 1e9)}B</td>
             </tr>`;
     }); filterTable();
 }
 
 function renderFiat(data) {
     const tbody = document.getElementById('data-table'); tbody.innerHTML = '';
+    
+    const { baseCur, baseRate, baseIcon } = getBaseCurrencyInfo();
+
     data.forEach(i => {
+        if (i.symbol === baseCur) return; // არ გამოვაჩინოთ იგივე ვალუტა ცხრილში (მაგ. USD -> USD)
+        
+        const assetRate = rates[i.symbol] || 0;
+        const priceInBase = assetRate / baseRate; // დინამიური ფასი
+
         tbody.innerHTML += `
             <tr onclick="selectForConversion('${i.symbol}')" class="hover:bg-slate-200/50 dark:hover:bg-slate-700/40 transition border-b border-slate-200 dark:border-slate-800 group">
                 <td class="p-4 text-center text-slate-300">-</td>
                 <td class="p-4 flex items-center space-x-4"><div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md">${i.symbol[0]}</div>
                     <div><span class="block font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 transition">${i.name}</span><span class="text-[10px] text-slate-500 uppercase">${i.symbol}</span></div>
                 </td>
-                <td class="p-4 text-right font-mono text-sm font-bold text-emerald-700 dark:text-emerald-400">${formatNum(i.price, 4)} ₾</td>
+                <td class="p-4 text-right font-mono text-sm font-bold text-emerald-700 dark:text-emerald-400">${baseIcon} ${formatNum(priceInBase, 4)}</td>
                 <td class="p-4 text-right text-slate-500">--</td><td class="p-4 text-center hidden md:table-cell">--</td><td class="p-4 text-right hidden lg:table-cell text-xs text-slate-400">-</td>
             </tr>`;
     }); filterTable();
@@ -369,6 +398,10 @@ function switchTab(t) {
 function showLoader(show) { document.getElementById('loading-overlay').classList.toggle('hidden', !show); document.getElementById('refresh-icon').classList.toggle('fa-spin', show); }
 function updateTimestamp() { const el = document.getElementById('last-updated'); if(el) el.innerText = `Updated: ${new Date().toLocaleTimeString()}`; }
 function refreshData() { fetchFiatData(true); fetchCryptoData(true); fetchNews(); }
+
+document.getElementById('convert-from-select').addEventListener('change', () => {
+    updateConversion();
+});
 
 initTheme();
 document.getElementById('language-selector').value = currentLang;
